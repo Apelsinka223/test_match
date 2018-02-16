@@ -6,11 +6,11 @@ defmodule TestMatch.MixProject do
       app: :test_match,
       version: "0.1.0",
       elixir: "~> 1.6",
-      build_embedded: Mix.env == :prod,
-      start_permanent: Mix.env == :prod,
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
       description: description(),
       package: package(),
-      deps: deps(),
+      deps: deps()
     ]
   end
 
