@@ -74,6 +74,52 @@ defmodule RecursiveMatchTest do
       refute match_r c, a
       refute match_r d, a
     end
+
+    test "exactly false" do
+      assert match_r 1, 1.0, exactly: false
+      assert match_r 1.0, 1, exactly: false
+
+      a = %{a: 1.0, c: %{a: 1.0}}
+      b = %{a: 1, b: 2, c: %{a: 1, b: 2}}
+      c = %{b: 2}
+
+      assert match_r a, b, exactly: false
+      refute match_r b, a, exactly: false
+      refute match_r a, c, exactly: false
+      refute match_r c, a, exactly: false
+
+      d = 1.0
+      e = 1
+      f = 2
+
+      assert match_r d, e, exactly: false
+      assert match_r e, d, exactly: false
+      refute match_r d, f, exactly: false
+    end
+
+    test "exactly true" do
+      assert match_r 1.0, 1.0, exactly: true
+      assert match_r 1, 1, exactly: true
+      refute match_r 1, 1.0, exactly: true
+      refute match_r 1.0, 1, exactly: true
+
+      a = %{a: 1.0, c: %{a: 1.0}}
+      b = %{a: 1, b: 2, c: %{a: 1, b: 2}}
+      c = %{b: 2}
+
+      refute match_r a, b, exactly: true
+      refute match_r b, a, exactly: true
+      refute match_r a, c, exactly: true
+      refute match_r c, a, exactly: true
+
+      d = 1.0
+      e = 1
+      f = 2
+
+      refute match_r d, e, exactly: true
+      refute match_r e, d, exactly: true
+      refute match_r d, f, exactly: true
+    end
   end
 
   describe "assert_match?/3" do
@@ -153,7 +199,14 @@ defmodule RecursiveMatchTest do
                    """,
                    fn -> assert_match a, c, exactly: false end
 
-      assert_raise ExUnit.AssertionError, fn -> assert_match c, a, exactly: false end
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  %{b: 2}
+                   right: %{a: 1.0, c: %{a: 1.0}}
+                   """, fn -> assert_match c, a, exactly: false end
 
       d = 1.0
       e = 1
