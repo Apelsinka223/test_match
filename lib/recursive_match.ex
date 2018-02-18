@@ -5,8 +5,31 @@ defmodule RecursiveMatch do
 
   @type opts :: list() | nil
 
+  @doc """
+  Matches given value with pattern
+
+  Returns `true` or `false`
+
+  ## Parameters
+
+  - pattern: Expected pattern
+
+  - tested: Tested value
+
+  - opts:
+        * strict, when `true` compare using `===`, when `false` compare using `==`, default `true`
+
+  ## Example
+
+      iex> import RecursiveMatch
+      RecursiveMatch
+      iex> match_r %{a: 1}, %{a: 1, b: 2}
+      true
+      iex> match_r %{a: 1, b: 2}, %{a: 1}
+      false
+  """
   @spec match_r(any(), any(), opts()) :: boolean()
-  def match_r(pattern, tested, options \\ [exactly: true])
+  def match_r(pattern, tested, options \\ [strict: true])
 
   def match_r(pattern, %{__struct__: _} = tested, options) do
     match_r(pattern, Map.from_struct(tested), options)
@@ -33,14 +56,14 @@ defmodule RecursiveMatch do
   end
 
   def match_r(pattern, tested, options) when is_map(tested) and is_map(pattern) do
-    exactly = options[:exactly]
+    strict = options[:strict]
     Enum.all?(pattern, fn
       {_key, :_} -> true
 
       {key, value} when is_map(value) or is_list(value) ->
         match_r(value, tested[key], options)
 
-      {key, value} when exactly === true ->
+      {key, value} when strict === true ->
         value === tested[key]
 
       {key, value} ->
@@ -50,7 +73,7 @@ defmodule RecursiveMatch do
 
   def match_r(a, a, _), do: true
   def match_r(a, b, opts) do
-    case opts[:exactly] do
+    case opts[:strict] do
       true -> a === b
       nil -> a === b
       false -> a == b
@@ -58,7 +81,7 @@ defmodule RecursiveMatch do
   end
 
   @doc """
-  Recursive matches given value with pattern
+  Matches given value with pattern
 
   Returns `true` or raises `ExUnit.AssertionError`
 
@@ -69,9 +92,9 @@ defmodule RecursiveMatch do
   - tested: Tested value
 
   - opts:
-          * exactly: when `true` compare using `===`, when `false` compare using `==`
+          * strict: when `true` compare using `===`, when `false` compare using `==`, default `true`
 
-          * message: Custom message on faile
+          * message: Custom message on fail
 
   ## Example
 
@@ -93,7 +116,7 @@ defmodule RecursiveMatch do
   @callback assert_match(any(), any(), opts()) :: boolean()
 
   @doc """
-  Recursive matches given value with pattern
+  Matches given value with pattern
 
   Returns `true` or raises `ExUnit.AssertionError`
 
@@ -104,9 +127,9 @@ defmodule RecursiveMatch do
   - tested: Tested value
 
   - opts:
-          * exactly: when `true` compare using `===`, when `false` compare using `==`
+          * strict: when `true` compare using `===`, when `false` compare using `==`, default `true`
 
-          * message: Custom message on faile
+          * message: Custom message on fail
 
 
   ## Example
@@ -131,7 +154,7 @@ defmodule RecursiveMatch do
       import unquote(__MODULE__)
 
       @spec assert_match(any(), any(), list() | nil) :: boolean()
-      defmacro assert_match(left, right, opts \\ [exactly: true]) do
+      defmacro assert_match(left, right, opts \\ [strict: true]) do
         match_r = {:match_r, [], [left, right, opts]}
         message = opts[:message] || "match (assert_match) failed"
         quote do
@@ -147,7 +170,7 @@ defmodule RecursiveMatch do
       end
 
       @spec refute_match(any(), any(), list() | nil) :: boolean()
-      defmacro refute_match(left, right, opts \\ [exactly: true]) do
+      defmacro refute_match(left, right, opts \\ [strict: true]) do
         match_r = {:match_r, [], [left, right, opts]}
         message = opts[:message] || "match (refute_match) succeeded, but should have failed"
         quote do
