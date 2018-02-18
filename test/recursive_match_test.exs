@@ -1,7 +1,7 @@
 defmodule RecursiveMatchTest do
   use ExUnit.Case
   doctest RecursiveMatch
-  use RecursiveMatch
+  import RecursiveMatch
 
   defp fun_a(), do: 1
   defp fun_b(), do: 2

@@ -37,7 +37,9 @@ defmodule YourModule do
 
   def some_function do
     ...
+    match_r 1, 2
     match_r a, b
+    match_r :_, b
     ...
   end
 end
@@ -48,10 +50,12 @@ end
 ```elixir
 defmodule YourModuleTest do
   use ExUnit.Case
-  use RecursiveMatch
+  import RecursiveMatch
 
   test "some test" do
     ...
+    assert_match 1, 2
+    assert_match :_, b
     assert_match a, b
     refute_match a, c
     ...

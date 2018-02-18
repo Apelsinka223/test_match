@@ -3,8 +3,6 @@ defmodule RecursiveMatch do
   Recursive matching
   """
 
-  @type opts :: list() | nil
-
   @doc """
   Matches given value with pattern
 
@@ -12,7 +10,7 @@ defmodule RecursiveMatch do
 
   ## Parameters
 
-  - pattern: Expected pattern
+  - pattern: Expected pattern (use `:_` instead of `_`)
 
   - tested: Tested value
 
@@ -28,7 +26,7 @@ defmodule RecursiveMatch do
       iex> match_r %{a: 1, b: 2}, %{a: 1}
       false
   """
-  @spec match_r(any(), any(), opts()) :: boolean()
+  @spec match_r(any(), any(), list() | nil) :: boolean()
   def match_r(pattern, tested, options \\ [strict: true])
 
   def match_r(pattern, %{__struct__: _} = tested, options) do
@@ -87,7 +85,7 @@ defmodule RecursiveMatch do
 
   ## Parameters
 
-  - pattern: Expected pattern
+  - pattern: Expected pattern (use `:_` instead of `_`)
 
   - tested: Tested value
 
@@ -109,11 +107,26 @@ defmodule RecursiveMatch do
   will fail with the message:
 
       match (assert_match) failed
-      left: %{a: 1, b: 2},
+      left:  %{a: 1, b: 2},
       right: %{a: 1}
   """
 
-  @callback assert_match(any(), any(), opts()) :: boolean()
+  @spec assert_match(any(), any(), list() | nil) :: boolean()
+
+  defmacro assert_match(left, right, opts \\ [strict: true]) do
+    match_r = {:match_r, [], [left, right, opts]}
+    message = opts[:message] || "match (assert_match) failed"
+    quote do
+      right = unquote(right)
+      left = unquote(left)
+      message = unquote(message)
+
+      ExUnit.Assertions.assert unquote(match_r),
+                               right: right,
+                               left: left,
+                               message: message
+    end
+  end
 
   @doc """
   Matches given value with pattern
@@ -122,7 +135,7 @@ defmodule RecursiveMatch do
 
   ## Parameters
 
-  - pattern: Expected pattern
+  - pattern: Expected pattern (use `:_` instead of `_`)
 
   - tested: Tested value
 
@@ -146,42 +159,23 @@ defmodule RecursiveMatch do
 
       match (refute_match) succeeded, but should have failed
   """
+  @spec refute_match(any(), any(), list() | nil) :: boolean()
 
-  @callback refute_match(any(), any(), opts()) :: boolean()
+  defmacro refute_match(left, right, opts \\ [strict: true]) do
+    match_r = {:match_r, [], [left, right, opts]}
+    message = opts[:message] || "match (refute_match) succeeded, but should have failed"
+    quote do
+      right = unquote(right)
+      left = unquote(left)
+      message = unquote(message)
+
+      ExUnit.Assertions.refute unquote(match_r), message: message
+    end
+  end
 
   defmacro __using__([]) do
     quote do
       import unquote(__MODULE__)
-
-      @spec assert_match(any(), any(), list() | nil) :: boolean()
-      defmacro assert_match(left, right, opts \\ [strict: true]) do
-        match_r = {:match_r, [], [left, right, opts]}
-        message = opts[:message] || "match (assert_match) failed"
-        quote do
-          right = unquote(right)
-          left = unquote(left)
-          message = unquote(message)
-
-          ExUnit.Assertions.assert unquote(match_r),
-               right: right,
-               left: left,
-               message: message
-        end
-      end
-
-      @spec refute_match(any(), any(), list() | nil) :: boolean()
-      defmacro refute_match(left, right, opts \\ [strict: true]) do
-        match_r = {:match_r, [], [left, right, opts]}
-        message = opts[:message] || "match (refute_match) succeeded, but should have failed"
-        quote do
-          right = unquote(right)
-          left = unquote(left)
-          message = unquote(message)
-
-          ExUnit.Assertions.refute unquote(match_r),
-               message: message
-        end
-      end
     end
   end
 end
