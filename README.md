@@ -35,11 +35,16 @@ end
 defmodule YourModule do
   import RecursiveMatch
 
-  def some_function do
+  def function1 do
+    ...
+  end
+  
+  def function2 do
     ...
     match_r 1, 2
     match_r a, b
     match_r :_, b
+    match_r function1(), 1
     ...
   end
 end
@@ -58,6 +63,7 @@ defmodule YourModuleTest do
     assert_match :_, b
     assert_match a, b
     refute_match a, c
+    assert_match YourModule.function1(), 1
     ...
   end
 end
