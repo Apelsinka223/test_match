@@ -4,15 +4,15 @@ Module for matching
 
 ### What difference between `Kernel.match?/2` and `RecursiveMatch.match_r/3`?
 When you use `Kernel.match?/2`
-* can't invoke functions in pattern
+* can't use functions as pattern
 * can't match not strict equality (only `===`, no `==`)
 
-`RecursiveMatch.match_r/3` allows you invoke functions in patterns, match not strictly (with option `strict: false`)
+`RecursiveMatch.match_r/3` allows youuse functions as patterns, match not strictly (with option `strict: false`)
 
 ### What is for `assert_match/3` and `refute_match/3`?
 Is is same as `assert RecursiveMatch.match_r`, but with detailed fail message. ExUnit has no special message for `match_r/3` and even special message for `match?/2` is not detailed enough, it has no diff in fail message.
 
-`assert_match/3` provide diff in test fail message
+`assert_match/3` provides diff in test fail message
 
 
 <img src="/images/screenshot.png?raw=true" width="500" height="155">
