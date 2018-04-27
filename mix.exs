@@ -4,8 +4,8 @@ defmodule TestMatch.MixProject do
   def project do
     [
       app: :test_match,
-      version: "1.1.1",
-      elixir: "~> 1.0",
+      version: "1.1.2",
+      elixir: "~> 1.3",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       description: description(),
