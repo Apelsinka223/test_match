@@ -15,7 +15,9 @@ defmodule RecursiveMatch do
   - tested: Tested value
 
   - opts:
-        * strict, when `true` compare using `===`, when `false` compare using `==`, default `true`
+        * `strict`, when `true` compare using `===`, when `false` compare using `==`, default `true`
+
+        * `ignore_order`,  when `true` - ignore order of items in lists, default `false`
 
   ## Example
 
@@ -43,6 +45,21 @@ defmodule RecursiveMatch do
 
   def match_r(pattern, tested, options) when is_list(tested) and is_list(pattern) do
     if Enum.count(pattern) == Enum.count(tested) do
+
+      pattern =
+        if options[:ignore_order] == true do
+          Enum.sort(pattern)
+        else
+          pattern
+        end
+
+      tested =
+        if options[:ignore_order] == true do
+          Enum.sort(tested)
+        else
+          tested
+        end
+
       pattern
       |> Enum.zip(tested)
       |> Enum.all?(fn {pattern_item, tested_item} ->
@@ -91,6 +108,8 @@ defmodule RecursiveMatch do
 
   - opts:
           * strict: when `true` compare using `===`, when `false` compare using `==`, default `true`
+
+          * `ignore_order`,  when `true` - ignore order of items in lists, default `false`
 
           * message: Custom message on fail
 
@@ -141,6 +160,8 @@ defmodule RecursiveMatch do
 
   - opts:
           * strict: when `true` compare using `===`, when `false` compare using `==`, default `true`
+
+          * `ignore_order`,  when `true` - ignore order of items in lists, default `false`
 
           * message: Custom message on fail
 

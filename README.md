@@ -7,7 +7,10 @@ When you use `Kernel.match?/2`
 * can't use functions as pattern
 * can't match not strict equality (only `===`, no `==`)
 
-`RecursiveMatch.match_r/3` allows youuse functions as patterns, match not strictly (with option `strict: false`)
+`RecursiveMatch.match_r/3` allows you:
+* use functions as patterns
+* match not strictly (with option `strict: false`)
+* ignore order of lists item (with option `ignore_order: true`)
 
 ### What is for `assert_match/3` and `refute_match/3`?
 Is is same as `assert RecursiveMatch.match_r`, but with detailed fail message. ExUnit has no special message for `match_r/3` and even special message for `match?/2` is not detailed enough, it has no diff in fail message.
@@ -21,6 +24,8 @@ Is is same as `assert RecursiveMatch.match_r`, but with detailed fail message. E
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `test_match` to your list of dependencies in `mix.exs`:
+
+**Requires `elixir ~> 1.5`**
 
 ```elixir
 def deps do

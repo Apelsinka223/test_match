@@ -7,6 +7,10 @@ defmodule RecursiveMatchTest do
   defp fun_b(), do: 2
   defp fun_c(), do: 1
 
+  defmodule TestStruct do
+    defstruct [:field1, :field2]
+  end
+
   describe "match_r/3" do
     test "values" do
       assert match_r 1, 1
@@ -32,10 +36,24 @@ defmodule RecursiveMatchTest do
       b = %{a: 1, b: 2, c: %{a: 1, b: 2}}
       c = %{b: 2}
 
+      assert match_r a, b
       refute match_r b, a
       refute match_r a, c
       refute match_r c, a
       assert match_r a.a, b.a
+    end
+
+    test "structs" do
+      a = %TestStruct{field1: 1, field2: %{a: 1}}
+      b = %TestStruct{field1: 1, field2: %{a: 1, b: 2}}
+      c = %TestStruct{field1: 1}
+
+      assert match_r a, b
+      refute match_r b, a
+      assert match_r %{field1: 1}, a
+      refute match_r c, a
+      refute match_r a, c
+      assert match_r a.field1, b.field1
     end
 
     test "tuples" do
@@ -54,12 +72,21 @@ defmodule RecursiveMatchTest do
       b = [1, 2]
       c = [2, 1]
       d = [4]
+      e = [1]
 
       assert match_r a, b
       assert match_r b, a
       refute match_r a, c
       refute match_r c, a
       refute match_r d, a
+      refute match_r a, e
+      refute match_r e, a
+      assert match_r a, c, ignore_order: true
+      assert match_r c, a, ignore_order: true
+      refute match_r a, d, ignore_order: true
+      refute match_r d, a, ignore_order: true
+      refute match_r a, e, ignore_order: true
+      refute match_r e, a, ignore_order: true
     end
 
     test "keyword lists" do
@@ -67,12 +94,19 @@ defmodule RecursiveMatchTest do
       b = [a: 1]
       c = [b: 2, a: 1]
       d = [d: 1]
+      e = [a: 1, b: 2]
 
       assert match_r a, b
       assert match_r b, a
       refute match_r a, c
       refute match_r c, a
       refute match_r d, a
+      refute match_r a, e
+      refute match_r e, a
+      assert match_r c, e, ignore_order: true
+      assert match_r e, c, ignore_order: true
+      refute match_r a, c, ignore_order: true
+      refute match_r c, a, ignore_order: true
     end
 
     test "strict false" do
