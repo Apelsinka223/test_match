@@ -1,5 +1,5 @@
 
-[![Hex.pm](https://img.shields.io/hexpm/v/plug.svg)](https://hex.pm/packages/test_match)
+[![Hex.pm](https://img.shields.io/hexpm/v/test_match.svg)](https://hex.pm/packages/test_match)
 [![Build Status](https://travis-ci.org/Apelsinka223/test_match.svg?branch=master)](https://travis-ci.org/Apelsinka223/test_match)
 [![Coverage Status](https://coveralls.io/repos/github/Apelsinka223/test_match/badge.svg?branch=master)](https://coveralls.io/github/Apelsinka223/test_match?branch=master)
 [![Inline docs](http://inch-ci.org/github/Apelsinka223/test_match.svg?branch=master)](http://inch-ci.org/github/Apelsinka223/test_match)
