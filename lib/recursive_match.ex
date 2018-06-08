@@ -47,12 +47,12 @@ defmodule RecursiveMatch do
   def match_r(pattern, tested, options) when is_list(tested) and is_list(pattern) do
     if Enum.count(pattern) == Enum.count(tested) do
       if options[:ignore_order] == true do
-        match_lists_ignore_order(pattern, tested)
+        match_lists_ignore_order(pattern, tested, options)
       else
         pattern
         |> Enum.zip(tested)
         |> Enum.all?(fn {pattern_item, tested_item} ->
-               match_r(pattern_item, tested_item, options)
+             match_r(pattern_item, tested_item, options)
            end)
       end
     else
@@ -85,16 +85,16 @@ defmodule RecursiveMatch do
     end
   end
 
-  defp match_lists_ignore_order([], []), do: true
+  defp match_lists_ignore_order([], [], _), do: true
 
-  defp match_lists_ignore_order([pattern | pattern_tail], tested) do
-    case Enum.find_index(tested, fn t -> match_r pattern, t end) do
+  defp match_lists_ignore_order([pattern | pattern_tail], tested, options) do
+    case Enum.find_index(tested, fn t -> match_r(pattern, t, options) end) do
       nil ->
         false
 
       index ->
         tested_rest = List.delete_at(tested, index)
-        match_lists_ignore_order(pattern_tail, tested_rest)
+        match_lists_ignore_order(pattern_tail, tested_rest, options)
     end
   end
 

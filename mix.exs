@@ -4,7 +4,7 @@ defmodule TestMatch.MixProject do
   def project do
     [
       app: :test_match,
-      version: "1.2.1",
+      version: "1.2.2",
       elixir: "~> 1.5",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -37,7 +37,7 @@ defmodule TestMatch.MixProject do
     [
       files: ["lib", "mix.exs", "README*", "LICENSE*"],
       maintainers: ["Anastasiya Dyachenko"],
-      licenses: ["Apache 2.0"],
+      licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/Apelsinka223/test_match"}
     ]
   end
