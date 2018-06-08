@@ -4,7 +4,7 @@ defmodule TestMatch.MixProject do
   def project do
     [
       app: :test_match,
-      version: "1.2.0",
+      version: "1.2.1",
       elixir: "~> 1.5",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -24,7 +24,8 @@ defmodule TestMatch.MixProject do
   defp deps do
     [
       {:ex_doc, "~> 0.14", only: :dev},
-      {:excoveralls, github: "parroty/excoveralls", only: :test}
+      {:excoveralls, github: "parroty/excoveralls", only: :test},
+      {:inch_ex, only: :docs}
     ]
   end
 

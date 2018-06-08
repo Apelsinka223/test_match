@@ -14,7 +14,8 @@ defmodule RecursiveMatch do
 
   - tested: Tested value
 
-  - opts:
+  - options: Options
+
         * `strict`, when `true` compare using `===`, when `false` compare using `==`, default `true`
 
         * `ignore_order`,  when `true` - ignore order of items in lists, default `false`
@@ -28,7 +29,7 @@ defmodule RecursiveMatch do
       iex> match_r %{a: 1, b: 2}, %{a: 1}
       false
   """
-  @spec match_r(any(), any(), list() | nil) :: boolean()
+  @spec match_r(term, term, list | nil) :: boolean
   def match_r(pattern, tested, options \\ [strict: true])
 
   def match_r(pattern, %{__struct__: _} = tested, options) do
@@ -45,26 +46,15 @@ defmodule RecursiveMatch do
 
   def match_r(pattern, tested, options) when is_list(tested) and is_list(pattern) do
     if Enum.count(pattern) == Enum.count(tested) do
-
-      pattern =
-        if options[:ignore_order] == true do
-          Enum.sort(pattern)
-        else
-          pattern
-        end
-
-      tested =
-        if options[:ignore_order] == true do
-          Enum.sort(tested)
-        else
-          tested
-        end
-
-      pattern
-      |> Enum.zip(tested)
-      |> Enum.all?(fn {pattern_item, tested_item} ->
-        match_r(pattern_item, tested_item, options)
-      end)
+      if options[:ignore_order] == true do
+        match_lists_ignore_order(pattern, tested)
+      else
+        pattern
+        |> Enum.zip(tested)
+        |> Enum.all?(fn {pattern_item, tested_item} ->
+               match_r(pattern_item, tested_item, options)
+           end)
+      end
     else
       false
     end
@@ -87,11 +77,24 @@ defmodule RecursiveMatch do
   end
 
   def match_r(a, a, _), do: true
-  def match_r(a, b, opts) do
-    case opts[:strict] do
+  def match_r(a, b, options) do
+    case options[:strict] do
       true -> a === b
       nil -> a === b
       false -> a == b
+    end
+  end
+
+  defp match_lists_ignore_order([], []), do: true
+
+  defp match_lists_ignore_order([pattern | pattern_tail], tested) do
+    case Enum.find_index(tested, fn t -> match_r pattern, t end) do
+      nil ->
+        false
+
+      index ->
+        tested_rest = List.delete_at(tested, index)
+        match_lists_ignore_order(pattern_tail, tested_rest)
     end
   end
 
@@ -106,7 +109,8 @@ defmodule RecursiveMatch do
 
   - tested: Tested value
 
-  - opts:
+  - options: Options
+
           * strict: when `true` compare using `===`, when `false` compare using `==`, default `true`
 
           * `ignore_order`,  when `true` - ignore order of items in lists, default `false`
@@ -130,11 +134,10 @@ defmodule RecursiveMatch do
       right: %{a: 1}
   """
 
-  @spec assert_match(any(), any(), list() | nil) :: boolean()
-
-  defmacro assert_match(left, right, opts \\ [strict: true]) do
-    match_r = {:match_r, [], [left, right, opts]}
-    message = opts[:message] || "match (assert_match) failed"
+  @spec assert_match(term, term, list | nil) :: boolean
+  defmacro assert_match(left, right, options \\ [strict: true]) do
+    match_r = {:match_r, [], [left, right, options]}
+    message = options[:message] || "match (assert_match) failed"
     quote do
       right = unquote(right)
       left = unquote(left)
@@ -158,7 +161,8 @@ defmodule RecursiveMatch do
 
   - tested: Tested value
 
-  - opts:
+  - options: Options
+
           * strict: when `true` compare using `===`, when `false` compare using `==`, default `true`
 
           * `ignore_order`,  when `true` - ignore order of items in lists, default `false`
@@ -180,11 +184,10 @@ defmodule RecursiveMatch do
 
       match (refute_match) succeeded, but should have failed
   """
-  @spec refute_match(any(), any(), list() | nil) :: boolean()
-
-  defmacro refute_match(left, right, opts \\ [strict: true]) do
-    match_r = {:match_r, [], [left, right, opts]}
-    message = opts[:message] || "match (refute_match) succeeded, but should have failed"
+  @spec refute_match(term, term, list | nil) :: boolean
+  defmacro refute_match(left, right, options \\ [strict: true]) do
+    match_r = {:match_r, [], [left, right, options]}
+    message = options[:message] || "match (refute_match) succeeded, but should have failed"
     quote do
       right = unquote(right)
       left = unquote(left)

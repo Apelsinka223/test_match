@@ -73,6 +73,8 @@ defmodule RecursiveMatchTest do
       c = [2, 1]
       d = [4]
       e = [1]
+      f = [%{a: 1, b: 2}, %{a: 2, b: 1}]
+      g = [%{b: 1}, %{b: 2}]
 
       assert match_r a, b
       assert match_r b, a
@@ -87,6 +89,9 @@ defmodule RecursiveMatchTest do
       refute match_r d, a, ignore_order: true
       refute match_r a, e, ignore_order: true
       refute match_r e, a, ignore_order: true
+      assert match_r g, f, ignore_order: true
+      refute match_r g, f
+      refute match_r f, g, ignore_order: true
     end
 
     test "keyword lists" do
