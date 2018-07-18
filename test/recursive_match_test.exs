@@ -76,7 +76,8 @@ defmodule RecursiveMatchTest do
       f = [%{a: 1, b: [2, 1, 3]}, %{a: 2, b: [2, 1]}]
       g = [%{b: [1, 2]}, %{b: [1, 2, 3]}]
 
-      assert match_r a, b
+      assert match_r [:_], ["a"]
+      refute match_r [:_], ["a", "b"]
       assert match_r b, a
       refute match_r a, c
       refute match_r c, a
