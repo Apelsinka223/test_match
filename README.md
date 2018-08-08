@@ -19,7 +19,7 @@ When you use `Kernel.match?/2`
 * ignore order of lists item (with option `ignore_order: true`)
 
 ### What is for `assert_match/3` and `refute_match/3`?
-Is is same as `assert RecursiveMatch.match_r`, but with detailed fail message. ExUnit has no special message for `match_r/3` and even special message for `match?/2` is not detailed enough, it has no diff in fail message.
+It is same as `assert RecursiveMatch.match_r`, but with detailed fail message. ExUnit has no special message for `match_r/3` and even special message for `match?/2` is not detailed enough, it has no diff in fail message.
 
 `assert_match/3` provides diff in test fail message
 
