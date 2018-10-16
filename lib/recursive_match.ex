@@ -138,14 +138,15 @@ defmodule RecursiveMatch do
 
   @spec assert_match(term, term, list | nil) :: boolean
   defmacro assert_match(left, right, options \\ [strict: true]) do
-    match_r = {:match_r, [], [left, right, options]}
     message = options[:message] || "match (assert_match) failed"
     quote do
+
       right = unquote(right)
       left = unquote(left)
       message = unquote(message)
+      options = unquote(options)
 
-      ExUnit.Assertions.assert unquote(match_r),
+      ExUnit.Assertions.assert match_r(left, right, options),
                                right: right,
                                left: left,
                                message: message
@@ -188,14 +189,14 @@ defmodule RecursiveMatch do
   """
   @spec refute_match(term, term, list | nil) :: boolean
   defmacro refute_match(left, right, options \\ [strict: true]) do
-    match_r = {:match_r, [], [left, right, options]}
     message = options[:message] || "match (refute_match) succeeded, but should have failed"
     quote do
       right = unquote(right)
       left = unquote(left)
       message = unquote(message)
+      options = unquote(options)
 
-      ExUnit.Assertions.refute unquote(match_r), message: message
+      ExUnit.Assertions.refute match_r(left, right, options), message: message
     end
   end
 

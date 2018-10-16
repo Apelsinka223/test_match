@@ -7,6 +7,8 @@ defmodule RecursiveMatchTest do
   defp fun_b(), do: 2
   defp fun_c(), do: 1
 
+  defp counter(table), do: :ets.update_counter(table, :counter, 1, {1, 0})
+
   defmodule TestStruct do
     defstruct [:field1, :field2]
   end
@@ -29,6 +31,16 @@ defmodule RecursiveMatchTest do
     test "functions" do
       assert match_r fun_a(), fun_c()
       refute match_r fun_a(), fun_b()
+    end
+
+    test "functions calls once" do
+      table = :ets.new(__MODULE__, [:set, :named_table])
+
+      assert match_r 1, counter(table)
+      refute match_r 1, counter(table)
+
+      # called 2 times
+      assert :ets.lookup_element(table, :counter, 2) == 2
     end
 
     test "maps" do
@@ -207,6 +219,27 @@ defmodule RecursiveMatchTest do
                    right: 2
                    """,
                    fn -> assert_match fun_a(), fun_b() end
+    end
+
+    test "functions calls once" do
+      table = :ets.new(__MODULE__, [:set, :named_table])
+
+      assert_match 1, counter(table)
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  1
+                   right: 2
+                   """,
+                   fn -> assert_match 1, counter(table) end
+
+      refute_match 1, counter(table)
+
+      # called 3 times
+      assert :ets.lookup_element(table, :counter, 2) == 3
     end
 
     test "strict false" do

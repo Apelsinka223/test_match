@@ -36,7 +36,7 @@ by adding `test_match` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:test_match, "~> 1.1.0"}
+    {:test_match, "~> 1.2.0"}
   ]
 end
 ```

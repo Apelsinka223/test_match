@@ -4,7 +4,7 @@ defmodule TestMatch.MixProject do
   def project do
     [
       app: :test_match,
-      version: "1.2.3",
+      version: "1.2.4",
       elixir: "~> 1.5",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
@@ -12,8 +12,13 @@ defmodule TestMatch.MixProject do
       package: package(),
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test,
-        "coveralls.html": :test, "coveralls.travis": :test]
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test,
+        "coveralls.travis": :test
+      ]
     ]
   end
 
