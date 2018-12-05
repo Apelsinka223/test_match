@@ -1,4 +1,5 @@
 defmodule RecursiveMatch do
+  alias IO.ANSI
   @moduledoc """
   Recursive matching
   """
@@ -29,6 +30,13 @@ defmodule RecursiveMatch do
       iex> match_r %{a: 1, b: 2}, %{a: 1}
       false
   """
+
+  defmacro __using__([]) do
+    quote do
+      import unquote(__MODULE__)
+    end
+  end
+
   @spec match_r(term, term, list | nil) :: boolean
   def match_r(pattern, tested, options \\ [strict: true])
 
@@ -67,14 +75,8 @@ defmodule RecursiveMatch do
     Enum.all?(pattern, fn
       {_key, :_} -> true
 
-      {key, value} when is_map(value) or is_list(value) ->
-        match_r(value, tested[key], options)
-
-      {key, value} when strict === true ->
-        value === tested[key]
-
       {key, value} ->
-        value == tested[key]
+        match_r(value, tested[key], options)
     end)
   end
 
@@ -191,17 +193,98 @@ defmodule RecursiveMatch do
     match_r = {:match_r, [], [left, right, options]}
     message = options[:message] || "match (refute_match) succeeded, but should have failed"
     quote do
-      right = unquote(right)
-      left = unquote(left)
       message = unquote(message)
 
       ExUnit.Assertions.refute unquote(match_r), message: message
     end
   end
 
-  defmacro __using__([]) do
-    quote do
-      import unquote(__MODULE__)
+  def formatter(left, right, options) do
+
+  end
+
+
+  def format_message({left, right}, left, right) do
+
+  end
+
+  def format_message(difference) when is_list(difference) do
+    difference
+    |> Enum.map(fn
+         {:eq, value} -> to_string(value)
+         {:ins, value} -> ANSI.green() <> to_string(value) <> ANSI.reset()
+         {:del, value} -> ANSI.red() <> to_string(value) <> ANSI.reset()
+       end)
+    |> Enum.join()
+  end
+
+
+  @spec diff(term, term, list | nil) :: boolean
+  def diff(pattern, tested, options \\ [strict: true])
+
+  def diff(:_, tested, options) do
+    {[eq: "_"], [eq: tested]}
+  end
+
+  def diff(pattern, tested, options) when is_binary(pattern) and is_binary(tested) do
+    {
+      Keyword.delete(String.myers_difference(pattern, tested), :ins),
+      Keyword.delete(String.myers_difference(tested, pattern), :del)
+    }
+  end
+
+  def diff(pattern, tested, options) when is_list(pattern) and is_list(tested) do
+    if options[:ignore_order] == true do
+      diff_lists_ignore_order(pattern, tested, options)
+    else
+      diff =
+        pattern
+        |> Enum.zip(tested)
+        |> Enum.flat_map(fn
+            {{key, pattern_item}, {key, tested_item}} ->
+              [{key, diff(pattern_item, tested_item, options)}]
+
+            {{key, pattern_item}, {another_key, tested_item}} ->
+              [{[del: key], {[del: pattern_item]}}, {[ins: another_key], {[ins: tested_item]}}]
+
+            {pattern_item, tested_item} ->
+              [diff(pattern_item, tested_item, options)]
+           end)
+    end
+  end
+
+  def diff(pattern, tested, options) when is_map(tested) and is_map(pattern) do
+    strict = options[:strict]
+
+    pattern
+    |> Enum.map(fn
+        {key, :_} -> {key, {[eq: "_"], [eq: tested[key]]}}
+
+        {key, value} ->
+          {key, diff(value, tested[key], options)}
+      end)
+    |>  Enum.into(%{})
+  end
+
+  def diff(pattern, tested, options) do
+    if match_r(pattern, tested, options) do
+      {[del: pattern], [ins: tested]}
+    else
+      {[eq: pattern], [eq: tested]}
+    end
+  end
+
+
+  defp diff_lists_ignore_order([], [], _), do: {[eq: []], [eq: []]}
+
+  defp diff_lists_ignore_order([pattern | pattern_tail], tested, options) do
+    case Enum.find_index(tested, fn t -> match_r(pattern, t, options) end) do
+      nil ->
+        false
+
+      index ->
+        tested_rest = List.delete_at(tested, index)
+        diff_lists_ignore_order(pattern_tail, tested_rest, options)
     end
   end
 end
