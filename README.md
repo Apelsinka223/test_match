@@ -53,18 +53,17 @@ defmodule YourModule do
   
   def function2 do
     ...
-    match_r 1, 2
+    match_r 1, 2 
     match_r a, b
     match_r :_, b
     match_r function1(), 1
-    match_r [1, 2], [2, 1], ignore_order: true
+    match_r [1, 2], [2, 1], ignore_order: true # true
     match_r 1, 1.0, strict: true               # false
     ...
   end
 end
 
 ```
-
 
 ```elixir
 defmodule YourModuleTest do
@@ -73,9 +72,12 @@ defmodule YourModuleTest do
 
   test "some test" do
     ...
-    assert_match 1, 2
+    assert_match 1, 2 # false
     assert_match :_, b
     assert_match a, b
+    assert_match [1, 2], [2, 1], ignore_order: true
+    refute_match 1, 1.0
+    assert_match 1, 1.0, strict: false          
     refute_match a, c
     assert_match YourModule.function1(), 1
     ...
@@ -83,6 +85,10 @@ defmodule YourModuleTest do
 end
 
 ```
+ ## Options
+   * `strict`: when `true` compare using `===`, when `false` compare using `==`, default `true`
+   * `ignore_order`,  when `true` - ignore order of items in lists, default `false`
+   * `message`: Custom message on fail
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
