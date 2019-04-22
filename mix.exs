@@ -28,9 +28,9 @@ defmodule TestMatch.MixProject do
 
   defp deps do
     [
-      {:ex_doc, "~> 0.14", only: :dev},
+      {:ex_doc, "~> 0.19", only: :dev},
       {:excoveralls, github: "parroty/excoveralls", only: :test},
-      {:inch_ex, only: :docs}
+      {:inch_ex, "~> 2.0", only: :docs}
     ]
   end
 
