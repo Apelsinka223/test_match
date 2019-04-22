@@ -59,6 +59,7 @@ defmodule YourModule do
     match_r function1(), 1
     match_r [1, 2], [2, 1], ignore_order: true # true
     match_r 1, 1.0, strict: true               # false
+    match_r {1, 2}, {2, 1}, ignore_order: true # false, nope :)
     ...
   end
 end

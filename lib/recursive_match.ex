@@ -43,7 +43,18 @@ defmodule RecursiveMatch do
   end
 
   def match_r(pattern, tested, options) when is_tuple(tested) and is_tuple(pattern) do
-    match_r(Tuple.to_list(pattern), Tuple.to_list(tested), options)
+    list_pattern = Tuple.to_list(pattern)
+    list_tested = Tuple.to_list(tested)
+
+    if Enum.count(list_pattern) == Enum.count(list_tested) do
+      list_pattern
+      |> Enum.zip(list_tested)
+      |> Enum.all?(fn {pattern_item, tested_item} ->
+        match_r(pattern_item, tested_item, options)
+      end)
+    else
+      false
+    end
   end
 
   def match_r(pattern, tested, options) when is_list(tested) and is_list(pattern) do
