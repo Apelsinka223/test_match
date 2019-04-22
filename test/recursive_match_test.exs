@@ -81,6 +81,8 @@ defmodule RecursiveMatchTest do
       # We cannot ignore tuples order
       refute match_r {1, 2}, {2, 1}, ignore_order: true
       refute match_r {1, 2}, {2, 1}
+      assert match_r [{1, 2}, {2, 1}], [{2, 1}, {1, 2}], ignore_order: true
+      refute match_r [{1, 2}, {2, 1}], [{2, 1}, {1, 2}]
     end
 
     test "lists" do
