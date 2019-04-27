@@ -11,12 +11,12 @@ env:
 before_script:
   - rvm install ruby-2.3.1
   - gem install pronto-credo pronto-dialyxir
-
+  — mix deps.get
 
 script:
-  — mix do deps.get
   - mix test
   - mix coveralls.travis
-  —  if [ "$PRONTO_PULL_REQUEST_ID" != false ]; then
+  — |
+     if [ "$PRONTO_PULL_REQUEST_ID" != false ]; then
        PRONTO_GITHUB_ACCESS_TOKEN=$PRONTO_GITHUB_ACCESS_TOKEN pronto run --exit-code -f github_pr_review -c origin/master ;
      fi
