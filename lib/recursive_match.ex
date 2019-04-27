@@ -147,7 +147,7 @@ defmodule RecursiveMatch do
       right: %{a: 1}
   """
 
-  @spec assert_match(term, term, list | nil) :: boolean
+  @spec assert_match(term, term, list | nil) :: binary
   defmacro assert_match(left, right, options \\ [strict: true]) do
     message = options[:message] || "match (assert_match) failed"
     quote do

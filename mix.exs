@@ -30,7 +30,8 @@ defmodule TestMatch.MixProject do
     [
       {:ex_doc, "~> 0.19", only: :dev},
       {:excoveralls, github: "parroty/excoveralls", only: :test},
-      {:inch_ex, "~> 2.0", only: :docs}
+      {:inch_ex, "~> 2.0", only: :docs},
+      {:dialyxir, "~> 1.0.0-rc.2", runtime: false}
     ]
   end
 

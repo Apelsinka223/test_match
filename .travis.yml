@@ -3,5 +3,18 @@ elixir:
   - '1.5'
 otp_release:
   - '19.0'
+env:
+ global:
+   - MIX_ENV=test
+   - $PRONTO_PULL_REQUEST_ID=$TRAVIS_PULL_REQUEST
+
+before_script:
+  - rvm install ruby-2.3.1
+  - gem install pronto-credo pronto-dialyxir
+
+
 script:
-  - "MIX_ENV=test mix do deps.get, test && mix compile && mix coveralls.travis"
+  — mix do deps.get, test && mix compile && mix coveralls.travis
+  —  if [ "$PRONTO_PULL_REQUEST_ID" != false ]; then
+       PRONTO_GITHUB_ACCESS_TOKEN=$PRONTO_GITHUB_ACCESS_TOKEN pronto run --exit-code -f github_pr_review -c origin/master ;
+     fi
