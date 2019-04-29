@@ -3,9 +3,9 @@ defmodule RecursiveMatchTest do
   doctest RecursiveMatch
   import RecursiveMatch
 
-  defp fun_a(), do: 1
-  defp fun_b(), do: 2
-  defp fun_c(), do: 1
+  defp fun_a, do: 1
+  defp fun_b, do: 2
+  defp fun_c, do: 1
 
   defp counter(table), do: :ets.update_counter(table, :counter, 1, {1, 0})
 
