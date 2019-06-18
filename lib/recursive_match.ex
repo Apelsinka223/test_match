@@ -36,7 +36,7 @@ defmodule RecursiveMatch do
     match_r(pattern, Map.from_struct(tested), options)
   end
 
-  def match_r(:_, _, options), do: true
+  def match_r(:_, _, _), do: true
 
   def match_r(%{__struct__: _} = pattern, tested, options) do
     match_r(Map.from_struct(pattern), tested, options)
