@@ -111,6 +111,30 @@ defmodule RecursiveMatch do
     end
   end
 
+  def sort_by_pattern(pattern, tested, options) when is_list(tested) and is_list(pattern) do
+    {tested, result} =
+      pattern
+      |> Enum.reduce_while({tested, []}, fn
+          value, {[tested], tested_matched_acc} ->
+           {:halt, {[], [tested | tested_matched_acc]}}
+
+          value, {tested, tested_matched_acc} ->
+            case Enum.find_index(tested, fn t -> match_r(value, t, options) end) do
+              nil ->
+              {:cont, {tl(tested), [hd(tested) | tested_matched_acc]}}
+
+              index ->
+                tested_matched = Enum.at(tested, index)
+                tested_rest = List.delete_at(tested, index)
+                {:cont, {tested_rest, [tested_matched | tested_matched_acc]}}
+            end
+          end)
+
+    Enum.reverse(result) ++ tested
+  end
+
+  def sort_by_pattern(_, tested, _), do: tested
+
   @doc """
   Matches given value with pattern
 
@@ -151,14 +175,20 @@ defmodule RecursiveMatch do
   defmacro assert_match(left, right, options \\ [strict: true]) do
     message = options[:message] || "match (assert_match) failed"
     quote do
-
       right = unquote(right)
       left = unquote(left)
       message = unquote(message)
       options = unquote(options)
 
+      right_result =
+        if unquote(options[:ignore_order]) do
+          RecursiveMatch.sort_by_pattern(left, right, options)
+        else
+          right
+        end
+
       ExUnit.Assertions.assert match_r(left, right, options),
-                               right: right,
+                               right: right_result,
                                left: left,
                                message: message
     end
@@ -202,7 +232,12 @@ defmodule RecursiveMatch do
   defmacro refute_match(left, right, options \\ [strict: true]) do
     message = options[:message] || "match (refute_match) succeeded, but should have failed"
     quote do
-      right = unquote(right)
+      right =
+        if unquote(options[:ignore_order]) do
+          unquote(RecursiveMatch.sort_by_pattern(left, right, options))
+        else
+          unquote(right)
+        end
       left = unquote(left)
       message = unquote(message)
       options = unquote(options)

@@ -405,6 +405,42 @@ defmodule RecursiveMatchTest do
                    fn -> assert_match d, f, strict: true end
     end
 
+    test "ignore_order true" do
+      a = [1, 2]
+      b = [2, 1, 3]
+      c = 1
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  [1, 2]
+                   right: [1, 2, 3]
+                   """,
+                   fn -> assert_match a, b, ignore_order: true end
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  [2, 1, 3]
+                   right: [2, 1]
+                   """,
+                   fn -> assert_match b, a, ignore_order: true end
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  [1, 2]
+                   right: 1
+                   """,
+                   fn -> assert_match a, c, ignore_order: true end
+    end
+
     test "with message" do
       assert_raise ExUnit.AssertionError,
                    """
