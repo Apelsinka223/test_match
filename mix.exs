@@ -40,7 +40,7 @@ defmodule TestMatch.MixProject do
 
   defp package() do
     [
-      files: ["lib", "mix.exs", "README*", "LICENSE*"],
+      files: ["lib", "mix.exs", "README*", "LICENSE*", ".formatter.exs"],
       maintainers: ["Anastasiya Dyachenko"],
       licenses: ["MIT"],
       links: %{"GitHub" => "https://github.com/Apelsinka223/test_match"}
