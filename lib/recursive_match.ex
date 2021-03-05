@@ -115,7 +115,6 @@ defmodule RecursiveMatch do
       when is_struct(tested) and not is_struct(pattern),
     do: prepare_right_for_diff(pattern, Map.from_struct(tested), options)
 
-
   def prepare_right_for_diff(%{__struct__: struct} = pattern, tested, options)
       when is_struct(tested) and is_struct(pattern) do
     pattern
@@ -153,18 +152,29 @@ defmodule RecursiveMatch do
 
   def prepare_right_for_diff(pattern, tested, options)
        when is_map(tested) and is_map(pattern) do
-    pattern
+    tested
+    |> filter_tested(pattern)
     |> Enum.map(fn
       {_key, :_} ->
-        tested
+        :_
 
       {key, value} ->
-        {key, prepare_right_for_diff(value, Map.get(tested, key), options)}
+        {key, prepare_right_for_diff(Map.get(pattern, key), value, options)}
     end)
     |> Map.new()
   end
 
   def prepare_right_for_diff(_pattern, tested, _options), do: tested
+
+  defp filter_tested(tested, pattern) do
+    if list_intersection(Map.keys(tested), Map.keys(pattern)) == [] do
+      tested
+    else
+      Map.take(tested, Map.keys(pattern))
+    end
+  end
+
+  defp list_intersection(a, b), do: a -- (a -- b)
 
   def prepare_left_for_diff(pattern, tested, options)
       when is_struct(pattern) and not is_struct(tested),

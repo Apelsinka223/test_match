@@ -382,7 +382,7 @@ defmodule RecursiveMatchTest do
 
                    match (assert_match) failed
                    left:  %{a: 1.0, c: %{a: 1.0}}
-                   right: %{a: 1, b: 2, c: %{a: 1, b: 2}}
+                   right: %{a: 1, c: %{a: 1}}
                    """,
                    fn -> assert_match a, b, strict: true end
 
