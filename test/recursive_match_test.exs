@@ -53,6 +53,7 @@ defmodule RecursiveMatchTest do
       refute match_r a, c
       refute match_r c, a
       assert match_r a.a, b.a
+      refute match_r %{c: nil}, %{}
     end
 
     test "structs" do
@@ -193,6 +194,51 @@ defmodule RecursiveMatchTest do
                    right: 2
                    """,
                    fn -> assert_match 1, 2 end
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  %{a: [1, 2]}
+                   right: %{a: [1, 2, 3]}
+                   """, fn -> assert_match %{a: [1, 2]}, %{a: [2, 1, 3]}, ignore_order: true end
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  %{a: [1, 2, 3]}
+                   right: %{a: [1, 2]}
+                   """, fn -> assert_match %{a: [1, 2, 3]}, %{a: [2, 1]}, ignore_order: true end
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  %{a: [1, 2]}
+                   right: %{a: [2, 1, 3]}
+                   """, fn -> assert_match %{a: [1, 2]}, %{a: [2, 1, 3]}, ignore_order: false end
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  %{a: [1, 2, 3]}
+                   right: %{a: [2, 1]}
+                   """, fn -> assert_match %{a: [1, 2, 3]}, %{a: [2, 1]}, ignore_order: false end
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  %{field1: 2}
+                   right: %{field1: 1}
+                   """, fn -> assert_match %{field1: 2}, %TestStruct{field1: 1, field2: %{a: 1}} end
     end
 
     test "variables" do
