@@ -82,10 +82,10 @@ defmodule RecursiveMatch do
         match_r(value, tested[key], options)
 
       {key, value} when strict === true ->
-        value === tested[key]
+        Map.has_key?(tested, key) and value === Map.get(tested, key)
 
       {key, value} ->
-        value == tested[key]
+        Map.has_key?(tested, key) and value == Map.get(tested, key)
     end)
   end
 
@@ -109,6 +109,127 @@ defmodule RecursiveMatch do
         tested_rest = List.delete_at(tested, index)
         match_lists_ignore_order(pattern_tail, tested_rest, options)
     end
+  end
+
+  def prepare_right_for_diff(pattern, tested, options)
+      when is_struct(tested) and not is_struct(pattern),
+    do: prepare_right_for_diff(pattern, Map.from_struct(tested), options)
+
+
+  def prepare_right_for_diff(%{__struct__: struct} = pattern, tested, options)
+      when is_struct(tested) and is_struct(pattern) do
+    pattern
+    |> Map.from_struct()
+    |> Enum.map(fn
+      {_key, :_} ->
+        tested
+
+      {key, value} ->
+        {key, prepare_right_for_diff(value, Map.get(tested, key), options)}
+    end)
+    |> Map.new()
+    |> (& struct(struct, &1)).()
+  end
+
+  def prepare_right_for_diff(pattern, tested, options)
+       when is_list(tested) and is_list(pattern) do
+    if options[:ignore_order] === true do
+     tested
+      |> Enum.sort_by(&Enum.find_index(pattern, fn v -> v == &1 end), &<=/2)
+      |> zip_with_rest(pattern)
+      |> Enum.map(fn {tested, pattern} ->
+        prepare_right_for_diff(pattern, tested, options)
+      end)
+      |> Enum.filter(& &1 != :zip_nil)
+    else
+      tested
+      |> zip_with_rest(pattern)
+      |> Enum.map(fn {tested, pattern} ->
+        prepare_right_for_diff(pattern, tested, options)
+      end)
+      |> Enum.filter(& &1 != :zip_nil)
+    end
+  end
+
+  def prepare_right_for_diff(pattern, tested, options)
+       when is_map(tested) and is_map(pattern) do
+    pattern
+    |> Enum.map(fn
+      {_key, :_} ->
+        tested
+
+      {key, value} ->
+        {key, prepare_right_for_diff(value, Map.get(tested, key), options)}
+    end)
+    |> Map.new()
+  end
+
+  def prepare_right_for_diff(_pattern, tested, _options), do: tested
+
+  def prepare_left_for_diff(pattern, tested, options)
+      when is_struct(pattern) and not is_struct(tested),
+    do: prepare_left_for_diff(Map.from_struct(pattern), tested, options)
+
+  def prepare_left_for_diff(%{__struct__: struct} = pattern, tested, options)
+      when is_struct(tested) and is_struct(pattern) do
+    pattern
+    |> Map.from_struct
+    |> Enum.map(fn
+      {_key, :_} ->
+        :_
+
+      {key, value} ->
+        {key, prepare_left_for_diff(value, Map.get(tested, key), options)}
+    end)
+    |> Map.new()
+    |> (& struct(struct, &1)).()
+  end
+
+  def prepare_left_for_diff(pattern, tested, options)
+       when is_list(tested) and is_list(pattern) do
+    pattern
+    |> zip_with_rest(tested)
+    |> Enum.map(fn {pattern, tested} ->
+      prepare_left_for_diff(pattern, tested, options)
+    end)
+   |> Enum.filter(& &1 != :zip_nil)
+  end
+
+  def prepare_left_for_diff(pattern, tested, options)
+       when is_map(tested) and is_map(pattern) do
+    pattern
+    |> Enum.map(fn
+      {_key, :_} ->
+        :_
+
+      {key, value} ->
+        {key, prepare_left_for_diff(value, Map.get(tested, key), options)}
+    end)
+    |> Map.new()
+  end
+
+  def prepare_left_for_diff(pattern, _tested, _options), do: pattern
+
+  defp zip_with_rest(a, b) do
+    if length(a) > length(b) do
+      Enum.reduce(a, {[], b}, fn
+        a_i, {acc, [b_i | b_rest]} ->
+          {[{a_i, b_i} | acc], b_rest}
+
+        a_i, {acc, []} ->
+          {[{a_i, :zip_nil} | acc], []}
+      end)
+    else
+      Enum.reduce(b, {[], a}, fn
+        b_i, {acc, [a_i | a_rest]} ->
+          {[{a_i, b_i} | acc], a_rest}
+
+        b_i, {acc, []} ->
+          {[{:zip_nil, b_i} | acc], []}
+      end)
+    end
+    |> elem(0)
+    |> Enum.reverse()
   end
 
   @doc """
@@ -157,9 +278,12 @@ defmodule RecursiveMatch do
       message = unquote(message)
       options = unquote(options)
 
+      prepared_right = prepare_right_for_diff(left, right, options)
+      prepared_left = prepare_left_for_diff(left, right, options)
+
       ExUnit.Assertions.assert match_r(left, right, options),
-                               right: right,
-                               left: left,
+                               right: prepared_right,
+                               left: prepared_left,
                                message: message
     end
   end
