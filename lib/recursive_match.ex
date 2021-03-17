@@ -112,7 +112,7 @@ defmodule RecursiveMatch do
   end
 
   def prepare_right_for_diff(pattern, tested, options)
-      when is_struct(tested) and not is_struct(pattern),
+      when is_struct(tested) and is_map(pattern) and not is_struct(pattern),
     do: prepare_right_for_diff(pattern, Map.from_struct(tested), options)
 
   def prepare_right_for_diff(%{__struct__: struct} = pattern, tested, options)
@@ -196,7 +196,7 @@ defmodule RecursiveMatch do
   defp list_intersection(a, b), do: a -- (a -- b)
 
   def prepare_left_for_diff(pattern, tested, options)
-      when is_struct(pattern) and not is_struct(tested),
+      when is_struct(pattern) and is_map(tested) and not is_struct(tested),
     do: prepare_left_for_diff(Map.from_struct(pattern), tested, options)
 
   def prepare_left_for_diff(%{__struct__: struct} = pattern, tested, options)

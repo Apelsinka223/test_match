@@ -268,6 +268,25 @@ defmodule RecursiveMatchTest do
                                       }
                                     }
                                   } end
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  %{field1: 2}
+                   right: %{field2: ~D[2020-01-01]}
+                   """, fn -> assert_match %{field1: 2}, %{field2: ~D[2020-01-01]} end
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  %{field1: ~D[2020-01-01]}
+                   right: %{field2: 1}
+                   """, fn -> assert_match %{field1: ~D[2020-01-01]}, %{field2: 1} end
+
     end
 
     test "variables" do
