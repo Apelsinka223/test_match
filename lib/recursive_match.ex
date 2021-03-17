@@ -130,7 +130,7 @@ defmodule RecursiveMatch do
           nil
         end
     end)
-    |> Enum.filter(& elem(&1, 1))
+    |> Enum.filter(& &1 && elem(&1, 1))
     |> (& struct(struct, &1)).()
   end
 
@@ -169,7 +169,7 @@ defmodule RecursiveMatch do
           nil
         end
     end)
-    |> Enum.filter(& elem(&1, 1))
+    |> Enum.filter(& &1 && elem(&1, 1))
     |> Map.new()
   end
 
