@@ -200,6 +200,26 @@ defmodule RecursiveMatchTest do
 
 
                    match (assert_match) failed
+                   left:  {:_}
+                   right: 2
+                   """,
+                   fn -> assert_match {:_}, 2 end
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  %{"a" => 1, "b" => 2}
+                   right: %{"a" => 1}
+                   """,
+                   fn -> assert_match %{"a" => :_, "b" => 2}, %{"a" => 1} end
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
                    left:  %{a: [1, 2]}
                    right: %{a: [1, 2, 3]}
                    """, fn -> assert_match %{a: [1, 2]}, %{a: [2, 1, 3]}, ignore_order: true end

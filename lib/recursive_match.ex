@@ -204,8 +204,8 @@ defmodule RecursiveMatch do
     pattern
     |> Map.from_struct
     |> Enum.map(fn
-      {_key, :_} ->
-        :_
+      {key, :_} ->
+        {key, Map.get(tested, key)}
 
       {key, value} ->
         {key, prepare_left_for_diff(value, Map.get(tested, key), options)}
@@ -228,8 +228,8 @@ defmodule RecursiveMatch do
        when is_map(tested) and is_map(pattern) do
     pattern
     |> Enum.map(fn
-      {_key, :_} ->
-        :_
+      {key, :_} ->
+        {key, Map.get(tested, key)}
 
       {key, value} ->
         {key, prepare_left_for_diff(value, Map.get(tested, key), options)}
@@ -237,6 +237,7 @@ defmodule RecursiveMatch do
     |> Map.new()
   end
 
+  def prepare_left_for_diff(:_, tested, _options), do: tested
   def prepare_left_for_diff(pattern, _tested, _options), do: pattern
 
   defp zip_with_rest(a, b) do
