@@ -239,6 +239,26 @@ defmodule RecursiveMatchTest do
                    left:  %{field1: 2}
                    right: %{field1: 1}
                    """, fn -> assert_match %{field1: 2}, %TestStruct{field1: 1, field2: %{a: 1}} end
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
+                   left:  {:ok, %{field1: 2}}
+                   right: {:ok, %{field1: 1}}
+                   """,
+                   fn ->
+                     assert_match {:ok, %{field1: 2}},
+                                  {
+                                    :ok,
+                                    %TestStruct{
+                                      field1: 1,
+                                      field2: %{
+                                        a: 1
+                                      }
+                                    }
+                                  } end
     end
 
     test "variables" do

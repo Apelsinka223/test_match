@@ -124,16 +124,20 @@ defmodule RecursiveMatch do
         tested
 
       {key, value} ->
-        {key, prepare_right_for_diff(value, Map.get(tested, key), options)}
+        if Map.has_key?(pattern, key) do
+          {key, prepare_right_for_diff(Map.get(pattern, key), value, options)}
+        else
+          nil
+        end
     end)
-    |> Map.new()
+    |> Enum.filter(& elem(&1, 1))
     |> (& struct(struct, &1)).()
   end
 
   def prepare_right_for_diff(pattern, tested, options)
        when is_list(tested) and is_list(pattern) do
     if options[:ignore_order] === true do
-     tested
+      tested
       |> Enum.sort_by(&Enum.find_index(pattern, fn v -> v == &1 end), &<=/2)
       |> zip_with_rest(pattern)
       |> Enum.map(fn {tested, pattern} ->
@@ -159,9 +163,29 @@ defmodule RecursiveMatch do
         :_
 
       {key, value} ->
-        {key, prepare_right_for_diff(Map.get(pattern, key), value, options)}
+        if Map.has_key?(pattern, key) do
+          {key, prepare_right_for_diff(Map.get(pattern, key), value, options)}
+        else
+          nil
+        end
     end)
+    |> Enum.filter(& elem(&1, 1))
     |> Map.new()
+  end
+
+  def prepare_right_for_diff(pattern, tested, options)
+      when is_tuple(pattern) and is_tuple(tested) do
+
+    list_pattern = Tuple.to_list(pattern)
+    list_tested = Tuple.to_list(tested)
+
+    list_tested
+    |> zip_with_rest(list_pattern)
+    |> Enum.map(fn {tested, pattern} ->
+      prepare_right_for_diff(pattern, tested, options)
+    end)
+    |> Enum.filter(& &1 != :zip_nil)
+    |> List.to_tuple()
   end
 
   def prepare_right_for_diff(_pattern, tested, _options), do: tested
