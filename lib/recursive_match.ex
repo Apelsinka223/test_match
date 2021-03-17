@@ -163,13 +163,8 @@ defmodule RecursiveMatch do
         :_
 
       {key, value} ->
-        if Map.has_key?(pattern, key) do
-          {key, prepare_right_for_diff(Map.get(pattern, key), value, options)}
-        else
-          nil
-        end
+        {key, prepare_right_for_diff(Map.get(pattern, key), value, options)}
     end)
-    |> Enum.filter(& &1 && elem(&1, 1))
     |> Map.new()
   end
 

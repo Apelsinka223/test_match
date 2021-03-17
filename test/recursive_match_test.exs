@@ -245,6 +245,15 @@ defmodule RecursiveMatchTest do
 
 
                    match (assert_match) failed
+                   left:  %{field1: 2}
+                   right: %{"field2" => 1}
+                   """, fn -> assert_match %{field1: 2}, %{"field2" => 1} end
+
+      assert_raise ExUnit.AssertionError,
+                   """
+
+
+                   match (assert_match) failed
                    left:  {:ok, %{field1: 2}}
                    right: {:ok, %{field1: 1}}
                    """,
